@@ -7,4 +7,7 @@ app.use(express.json());
 const userRoutes = require('./routes/users');
 app.use('/users', userRoutes);
 
+const corredoresRoutes = require('./routes/corredores');
+app.use('/corredores', corredoresRoutes);
+
 module.exports = app;
