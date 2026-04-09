@@ -1,0 +1,26 @@
+{
+  "name": "api_sakura_racing",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Mallconx14/API_sakura_racing.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Mallconx14/API_sakura_racing/issues"
+  },
+  "homepage": "https://github.com/Mallconx14/API_sakura_racing#readme",
+  "dependencies": {
+    "dotenv": "^17.4.1",
+    "express": "^5.2.1",
+    "mysql2": "^3.21.0",
+    "nodemon": "^3.1.14"
+  }
+}
