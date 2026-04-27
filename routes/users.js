@@ -6,9 +6,9 @@ const jwt = require('jsonwebtoken');
 const dotenv = require('dotenv');
 
 //CRUD - Create, Read, Update, Delete
-//Get all em usuarios
+//Get all em users
 routes.get('/', (req, res) => {
-  db.query('SELECT * FROM usuarios', (err, results) => {
+  db.query('SELECT * FROM users', (err, results) => {
     if (err) {
       res.status(500).json({ error: 'Erro ao buscar usuários' });
     } else {
@@ -26,7 +26,7 @@ routes.post('/login', async (req, res) => {
   }
     try {
     // Buscar usuário pelo email
-    db.query('SELECT * FROM usuarios WHERE email = ?', [email], async (err, results) => {
+    db.query('SELECT * FROM users WHERE email = ?', [email], async (err, results) => {
       if (err) {
         res.status(500).json({ error: 'Erro ao fazer login' });
       } else {
@@ -65,7 +65,7 @@ routes.post('/create', async (req, res) => {
     // Hash da senha usando bcrypt
     const senhaHash = await bcrypt.hash(senha, 10);
     
-    db.query('INSERT INTO usuarios (nome, email, senha) VALUES (?, ?, ?)',
+    db.query('INSERT INTO users (nome, email, senha) VALUES (?, ?, ?)',
       [nome, email, senhaHash], (err, results) => {
         if (err) {
           res.status(500).json({ error: 'Erro ao criar usuário' });
@@ -92,7 +92,7 @@ routes.put('/edit/:id', async (req, res) => {
       senhaHash = await bcrypt.hash(senha, 10);
     }
     
-    db.query('UPDATE usuarios SET nome = ?, email = ?, senha = ? WHERE id = ?',
+    db.query('UPDATE users SET nome = ?, email = ?, senha = ? WHERE id = ?',
       [nome, email, senhaHash, id], (err, results) => {
         if (err) {
           res.status(500).json({ error: 'Erro ao atualizar usuário' });
@@ -109,7 +109,7 @@ routes.put('/edit/:id', async (req, res) => {
 //deletar um usuario
 routes.delete('/delete/:id', (req, res) => {
   const { id } = req.params;
-  db.query('DELETE FROM usuarios WHERE id = ?', [id], (err, results) => {
+  db.query('DELETE FROM users WHERE id = ?', [id], (err, results) => {
     if (err) {
       res.status(500).json({ error: 'Erro ao deletar usuário' });
     } else {
@@ -121,7 +121,7 @@ routes.delete('/delete/:id', (req, res) => {
 //Buscar um usuario por id
 routes.get('/:id', (req, res) => {
   const { id } = req.params;
-  db.query('SELECT * FROM usuarios WHERE id = ?', [id], (err, results) => {
+  db.query('SELECT * FROM users WHERE id = ?', [id], (err, results) => {
     if (err) {
       res.status(500).json({ error: 'Erro ao buscar usuário' });
     } else {
