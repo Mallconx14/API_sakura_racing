@@ -17,6 +17,8 @@ routes.get('/', (req, res) => {
   });
 });
 
+const JWT_SECRET = process.env.JWT_SECRET;
+
 //Login de usuario
 routes.post('/login', async (req, res) => {
   const { email, senha } = req.body;
@@ -39,6 +41,15 @@ routes.post('/login', async (req, res) => {
           const senhaValida = await bcrypt.compare(senha, user.senha);
           
           if (senhaValida) {
+            const token = jwt.sign(
+              {
+                  id: user.id_users,
+                  email: user.email
+              },
+              JWT_SECRET,
+              { expiresIn: '8h' }
+          );
+
             // Remove a senha da resposta por segurança
             delete user.senha;
             res.status(200).json({ 
