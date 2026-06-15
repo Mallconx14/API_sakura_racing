@@ -63,15 +63,16 @@ router.post('/post', (req, res) => {
       return res.status(404).json({ error: 'Corredor nao encontrado' });
     }
 
-  const { pista } = req.body;
+    const { pista } = req.body;
 
-  if (!pista || String(pista).trim().length === 0) {
-    return res.status(400).json({ error: 'pista e obrigatoria' });
-  }
+    if (!pista || String(pista).trim().length === 0) {
+      return res.status(400).json({ error: 'pista e obrigatoria' });
+    }
 
-  const sql = dataVolta
+    const sql = dataVolta
       ? 'INSERT INTO voltas (tempo, data, pista, corredores_id) VALUES (?, ?, ?, ?)'
       : 'INSERT INTO voltas (tempo, pista, corredores_id) VALUES (?, ?, ?)';
+
     const params = dataVolta
       ? [tempo, dataVolta, pista, corredorId]
       : [tempo, pista, corredorId];
@@ -89,6 +90,88 @@ router.post('/post', (req, res) => {
         message: 'Volta registrada com sucesso'
       });
     });
+  });
+});
+
+// Dashboard: todas as voltas por corredor + melhor volta por pista
+router.get('/dashboard', (req, res) => {
+  const sql = `
+    SELECT 
+      c.id AS corredor_id,
+      c.nome AS corredor_nome,
+      c.turma,
+      v.id AS volta_id,
+      v.tempo,
+      v.data,
+      v.pista
+    FROM corredores c
+    LEFT JOIN voltas v ON v.corredores_id = c.id
+    ORDER BY c.nome ASC, v.data DESC, v.id DESC
+  `;
+
+  db.query(sql, (err, rows) => {
+    if (err) {
+      return res.status(500).json({ error: 'Erro ao buscar dados do dashboard' });
+    }
+
+    // Melhor volta por corredor
+    const porCorredorMap = new Map();
+    // Melhor volta global por pista
+    const melhorPorPistaMap = new Map();
+
+    for (const r of rows) {
+      const corredorKey = r.corredor_id;
+      if (!porCorredorMap.has(corredorKey)) {
+        porCorredorMap.set(corredorKey, {
+          corredor_id: r.corredor_id,
+          nome: r.corredor_nome,
+          turma: r.turma,
+          melhorVolta: null,
+          voltas: []
+        });
+      }
+
+      // Se o LEFT JOIN vier sem volta, v.* fica null
+      const hasVolta = r.volta_id !== null && r.volta_id !== undefined;
+
+      if (hasVolta) {
+        const volta = {
+          volta_id: r.volta_id,
+          tempo: r.tempo,
+          data: r.data,
+          pista: r.pista
+        };
+
+        const corredor = porCorredorMap.get(corredorKey);
+        corredor.voltas.push(volta);
+
+        if (!corredor.melhorVolta || Number(volta.tempo) < Number(corredor.melhorVolta.tempo)) {
+          corredor.melhorVolta = volta;
+        }
+
+        // melhor por pista (entre todos os corredores)
+        const pistaKey = String(r.pista || '').trim();
+        if (pistaKey) {
+          const current = melhorPorPistaMap.get(pistaKey);
+          if (!current || Number(volta.tempo) < Number(current.tempo)) {
+            melhorPorPistaMap.set(pistaKey, {
+              pista: pistaKey,
+              tempo: volta.tempo,
+              corredor_id: corredorKey,
+              corredor_nome: r.corredor_nome
+            });
+          }
+        }
+      }
+    }
+
+    const porCorredor = Array.from(porCorredorMap.values());
+    // Ordena voltas com tempo mais recente no backend (já veio por data desc). Mantém.
+
+    const melhorPorPista = Array.from(melhorPorPistaMap.values())
+      .sort((a, b) => Number(a.tempo) - Number(b.tempo));
+
+    return res.json({ porCorredor, melhorPorPista });
   });
 });
 

@@ -11,6 +11,16 @@ const connection = mysql.createConnection({
     port:process.env.DB_PORT
 });
 
+// Debug/validação: ajuda a identificar rapidamente problemas de conexão
+if (!process.env.DB_HOST || !process.env.DB_USER || !process.env.DB_NAME) {
+    console.error('Variáveis de ambiente do banco incompletas. Verifique DB_HOST/DB_USER/DB_NAME.');
+}
+
+if (!process.env.DB_PORT) {
+    console.warn('DB_PORT não definido no .env. Usando porta padrão do MySQL (3306).');
+}
+
+
 //Consulta de funcionalidade
 connection.connect((err) => {
     if (err) {
