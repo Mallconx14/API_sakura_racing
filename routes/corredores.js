@@ -13,42 +13,42 @@ routes.get('/', (req, res) => {
 });
 
 routes.post('/create', (req, res) => {
-  const { nome, turma } = req.body;
+  const { unidade, nome, turma } = req.body;
 
-  if (!nome || !turma) {
-    return res.status(400).json({ error: 'Nome e turma sao obrigatorios' });
+  if (!unidade || !nome || !turma) {
+    return res.status(400).json({ error: 'Unidade, nome e turma sao obrigatorios' });
   }
 
   db.query(
-    'INSERT INTO corredores (nome, turma) VALUES (?, ?)',
-    [nome, turma],
+    'INSERT INTO corredores (unidade, nome, turma) VALUES (?, ?, ?)',
+    [unidade, nome, turma],
     (err, results) => {
       if (err) {
         return res.status(500).json({ error: 'Erro ao criar corredor' });
       }
 
-      res.status(201).json({ id: results.insertId, nome, turma });
+      res.status(201).json({ id: results.insertId, unidade, nome, turma });
     }
   );
 });
 
 routes.put('/edit/:id', (req, res) => {
   const { id } = req.params;
-  const { nome, turma } = req.body;
+  const { unidade, nome, turma } = req.body;
 
-  if (!nome || !turma) {
-    return res.status(400).json({ error: 'Nome e turma sao obrigatorios' });
+  if (!unidade || !nome || !turma) {
+    return res.status(400).json({ error: 'Unidade, nome e turma sao obrigatorios' });
   }
 
   db.query(
-    'UPDATE corredores SET nome = ?, turma = ? WHERE id = ?',
-    [nome, turma, id],
+    'UPDATE corredores SET unidade = ?, nome = ?, turma = ? WHERE id = ?',
+    [unidade, nome, turma, id],
     (err) => {
       if (err) {
         return res.status(500).json({ error: 'Erro ao atualizar corredor' });
       }
 
-      res.status(200).json({ id, nome, turma });
+      res.status(200).json({ id, unidade, nome, turma });
     }
   );
 });
@@ -69,13 +69,14 @@ routes.get('/ranking/melhores-tempos', (req, res) => {
   db.query(`
     SELECT
       c.id,
+      c.unidade,
       c.nome,
       c.turma,
       MIN(v.tempo) AS melhor_tempo,
       COUNT(v.id) AS total_voltas
     FROM corredores c
     LEFT JOIN voltas v ON c.id = v.corredores_id
-    GROUP BY c.id, c.nome, c.turma
+    GROUP BY c.id, c.unidade, c.nome, c.turma
     ORDER BY melhor_tempo IS NULL, melhor_tempo ASC, c.nome ASC
   `, (err, results) => {
     if (err) {
@@ -88,7 +89,7 @@ routes.get('/ranking/melhores-tempos', (req, res) => {
 
 routes.get('/voltas/recentes', (req, res) => {
   db.query(`
-    SELECT v.id, v.tempo, v.data, c.nome AS corredor_nome, c.turma
+    SELECT v.id, v.tempo, v.data, c.unidade, c.nome AS corredor_nome, c.turma
     FROM voltas v
     JOIN corredores c ON v.corredores_id = c.id
     ORDER BY v.data DESC

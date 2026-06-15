@@ -40,6 +40,7 @@ DROP TABLE IF EXISTS sakuraracing.corredores ;
 
 CREATE TABLE IF NOT EXISTS sakuraracing.corredores (
   id INT NOT NULL AUTO_INCREMENT,
+  unidade VARCHAR(255) NOT NULL,
   nome VARCHAR(255) NOT NULL,
   turma VARCHAR(255) NOT NULL,
   PRIMARY KEY (id))
@@ -55,6 +56,7 @@ CREATE TABLE IF NOT EXISTS sakuraracing.voltas (
   id INT NOT NULL AUTO_INCREMENT,
   tempo DECIMAL(10,3) NOT NULL,
   data DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  pista VARCHAR(255) NOT NULL,
   corredores_id INT NOT NULL,
   PRIMARY KEY (id),
   INDEX fk_voltas_corredores_idx (corredores_id ASC),
@@ -64,6 +66,7 @@ CREATE TABLE IF NOT EXISTS sakuraracing.voltas (
     ON DELETE CASCADE
     ON UPDATE CASCADE)
 ENGINE = InnoDB;
+
 
 
 SET SQL_MODE=@OLD_SQL_MODE;

@@ -4,10 +4,11 @@ const db = require('../db');
 
 router.get('/', (req, res) => {
   db.query(`
-    SELECT v.id, v.tempo, v.data, v.corredores_id, c.nome AS corredor_nome, c.turma
+    SELECT v.id, v.tempo, v.data, v.pista, v.corredores_id, c.nome AS corredor_nome, c.turma
     FROM voltas v
     JOIN corredores c ON c.id = v.corredores_id
     ORDER BY v.data DESC
+
   `, (err, results) => {
     if (err) {
       return res.status(500).json({ error: 'Erro ao buscar voltas' });
@@ -29,11 +30,12 @@ router.get('/get', (req, res) => {
 
 router.get('/recentes', (req, res) => {
   db.query(`
-    SELECT v.id, v.tempo, v.data, c.nome AS corredor_nome, c.turma
+    SELECT v.id, v.tempo, v.data, v.pista, c.nome AS corredor_nome, c.turma
     FROM voltas v
     JOIN corredores c ON c.id = v.corredores_id
     ORDER BY v.data DESC
     LIMIT 10
+
   `, (err, results) => {
     if (err) {
       return res.status(500).json({ error: 'Erro ao buscar voltas recentes' });
@@ -61,12 +63,18 @@ router.post('/post', (req, res) => {
       return res.status(404).json({ error: 'Corredor nao encontrado' });
     }
 
-    const sql = dataVolta
-      ? 'INSERT INTO voltas (tempo, data, corredores_id) VALUES (?, ?, ?)'
-      : 'INSERT INTO voltas (tempo, corredores_id) VALUES (?, ?)';
+  const { pista } = req.body;
+
+  if (!pista || String(pista).trim().length === 0) {
+    return res.status(400).json({ error: 'pista e obrigatoria' });
+  }
+
+  const sql = dataVolta
+      ? 'INSERT INTO voltas (tempo, data, pista, corredores_id) VALUES (?, ?, ?, ?)'
+      : 'INSERT INTO voltas (tempo, pista, corredores_id) VALUES (?, ?, ?)';
     const params = dataVolta
-      ? [tempo, dataVolta, corredorId]
-      : [tempo, corredorId];
+      ? [tempo, dataVolta, pista, corredorId]
+      : [tempo, pista, corredorId];
 
     db.query(sql, params, (insertErr, results) => {
       if (insertErr) {
