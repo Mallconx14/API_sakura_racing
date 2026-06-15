@@ -51,10 +51,9 @@ ENGINE = InnoDB;
 DROP TABLE IF EXISTS sakuraracing.voltas ;
 
 CREATE TABLE IF NOT EXISTS sakuraracing.voltas (
-  id_volta INT NOT NULL AUTO_INCREMENT,
-  data_hora_inicio DATETIME(3) NOT NULL,
-  data_hora_fim DATETIME(3) NOT NULL,
-  tempo_volta_ms INT NOT NULL,
+  id INT NOT NULL AUTO_INCREMENT,
+  tempo TIME(3) NOT NULL,
+  dt DATE NOT NULL,
   PRIMARY KEY (id_volta))
 ENGINE = InnoDB;
 
@@ -62,3 +61,7 @@ ENGINE = InnoDB;
 SET SQL_MODE=@OLD_SQL_MODE;
 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
+
+
+
+SELECT * FROM users;
