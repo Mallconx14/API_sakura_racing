@@ -15,8 +15,8 @@ router.get('/get', (req, res) => {
 
 //Post em voltas (create)
 router.post('/post', (req, res) => {
-    const { data_hora_inicio, data_hora_fim, tempo_volta_ms } = req.body;
-    db.query('INSERT INTO voltas (data_hora_inicio, data_hora_fim, tempo_volta_ms) VALUES (?, ?, ?)', [data_hora_inicio, data_hora_fim, tempo_volta_ms], (err, results) => {
+    const { id, tempo, dt } = req.body;
+    db.query('INSERT INTO voltas (id, tempo, dt) VALUES (?, ?, ?)', [id, tempo, dt], (err, results) => {
         if (err) {
             console.error("ERRO:", err);
             res.status(500).json({ error: 'Erro ao inserir informações'});
