@@ -10,47 +10,45 @@ SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,N
 -- -----------------------------------------------------
 -- Schema mydb
 -- -----------------------------------------------------
-DROP SCHEMA IF EXISTS mydb ;
+DROP SCHEMA IF EXISTS sakuraracing ;
 
 -- -----------------------------------------------------
 -- Schema mydb
 -- -----------------------------------------------------
-CREATE SCHEMA IF NOT EXISTS mydb DEFAULT CHARACTER SET utf8 ;
-USE mydb ;
+CREATE SCHEMA IF NOT EXISTS sakuraracing DEFAULT CHARACTER SET utf8 ;
+USE sakuraracing ;
 
 -- -----------------------------------------------------
--- Table mydb.users
+-- Table sakuraracing.users
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS mydb.users ;
+DROP TABLE IF EXISTS sakuraracing.users ;
 
-CREATE TABLE IF NOT EXISTS mydb.users (
-  id INT NOT NULL AUTO_INCREMENT,
-  email VARCHAR(255) NOT NULL,
-  senha VARCHAR(255) NOT NULL,
-  nome VARCHAR(255) NOT NULL,
-  PRIMARY KEY (id))
-ENGINE = InnoDB;
-
-
--- -----------------------------------------------------
--- Table mydb.corredores
--- -----------------------------------------------------
-DROP TABLE IF EXISTS mydb.corredores ;
-
-CREATE TABLE IF NOT EXISTS mydb.corredores (
+CREATE TABLE IF NOT EXISTS sakuraracing.users (
   id INT NOT NULL AUTO_INCREMENT,
   nome VARCHAR(255) NOT NULL,
   email VARCHAR(255) NOT NULL,
-  equipe VARCHAR(255) NOT NULL,
   senha VARCHAR(255) NOT NULL,
   PRIMARY KEY (id))
 ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table mydb.voltas
+-- Table sakuraracing.corredores
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS mydb.voltas ;
+DROP TABLE IF EXISTS sakuraracing.corredores ;
+
+CREATE TABLE IF NOT EXISTS sakuraracing.corredores (
+  id INT NOT NULL AUTO_INCREMENT,
+  nome VARCHAR(255) NOT NULL,
+  turma VARCHAR(255) NOT NULL,
+  PRIMARY KEY (id))
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table sakuraracing.voltas
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS sakuraracing.voltas ;
 
 CREATE TABLE IF NOT EXISTS mydb.voltas (
   id_volta INT NOT NULL AUTO_INCREMENT,
