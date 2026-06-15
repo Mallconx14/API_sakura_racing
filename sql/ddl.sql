@@ -50,7 +50,7 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 DROP TABLE IF EXISTS sakuraracing.voltas ;
 
-CREATE TABLE IF NOT EXISTS mydb.voltas (
+CREATE TABLE IF NOT EXISTS sakuraracing.voltas (
   id_volta INT NOT NULL AUTO_INCREMENT,
   data_hora_inicio DATETIME(3) NOT NULL,
   data_hora_fim DATETIME(3) NOT NULL,
