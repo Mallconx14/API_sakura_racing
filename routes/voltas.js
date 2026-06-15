@@ -6,7 +6,7 @@ const db = require('../db');
 router.get('/get', (req, res) => {
     db.query('SELECT * FROM voltas', (err, results) => {
         if (err) {
-            res.status(500).json({ error: 'Erro ao buscar usuários' });
+            res.status(500).json({ error: 'Erro ao buscar voltas:', err });
         } else {
             res.json(results);
         }
@@ -25,5 +25,16 @@ router.post('/post', (req, res) => {
         }   
     });
 });
+
+router.delete('/delete/:id', (req, res) => {
+    const { id } = req.params;
+    db.query('DELETE FROM users WHERE id = ?', (err, results) => {
+        if (err) {
+            res.status(500).json({ error: 'Erro ao deletar volta:', err });
+          } else {
+            res.status(201).json({ message: 'Volta deletada com sucesso!' });
+          }  
+    })
+})
 
 module.exports = router;

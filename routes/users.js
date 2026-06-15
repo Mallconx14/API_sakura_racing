@@ -84,8 +84,8 @@ routes.post('/create', async (req, res) => {
           res.status(201).json({ id: results.insertId, nome, email });
         }
       });
-  } catch (error) {
-    console.error('Erro ao criar usuário:', error);
+  } catch (err) {
+    console.error('Erro ao criar usuário:', err);
     res.status(500).json({ error: 'Erro interno do servidor' });
   }
 });
@@ -122,9 +122,9 @@ routes.delete('/delete/:id', (req, res) => {
   const { id } = req.params;
   db.query('DELETE FROM users WHERE id = ?', [id], (err, results) => {
     if (err) {
-      res.status(500).json({ error: 'Erro ao deletar usuário' });
+      res.status(500).json({ error: 'Erro ao deletar usuário:', err });
     } else {
-      res.status(201).json({ message: 'Usuário deletado com sucesso' });
+      res.status(201).json({ message: 'Usuário deletado com sucesso!' });
     }
   });
 });
