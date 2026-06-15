@@ -2,160 +2,175 @@ const express = require('express');
 const routes = express.Router();
 const db = require('../db');
 
-//CRUD - Create, Read, Update, Delete
-//Get all corredores
 routes.get('/', (req, res) => {
-  db.query('SELECT * FROM corredores', (err, results) => {
+  db.query('SELECT * FROM corredores ORDER BY id DESC', (err, results) => {
     if (err) {
-      res.status(500).json({ error: 'Erro ao buscar corredores' });
-    } else {
-      res.json(results);
+      return res.status(500).json({ error: 'Erro ao buscar corredores' });
     }
+
+    res.json(results);
   });
 });
 
-//Criar um novo corredor
 routes.post('/create', (req, res) => {
   const { nome, turma } = req.body;
-  db.query('INSERT INTO corredores (nome, turma) VALUES (?, ?)',
-    [nome, turma], (err, results) => {
+
+  if (!nome || !turma) {
+    return res.status(400).json({ error: 'Nome e turma sao obrigatorios' });
+  }
+
+  db.query(
+    'INSERT INTO corredores (nome, turma) VALUES (?, ?)',
+    [nome, turma],
+    (err, results) => {
       if (err) {
-        res.status(500).json({ error: 'Erro ao criar corredor' });
-      } else {
-        res.status(201).json({ id: results.insertId, nome, turma });
+        return res.status(500).json({ error: 'Erro ao criar corredor' });
       }
-    });
+
+      res.status(201).json({ id: results.insertId, nome, turma });
+    }
+  );
 });
 
-//Editar um corredor
 routes.put('/edit/:id', (req, res) => {
   const { id } = req.params;
   const { nome, turma } = req.body;
-  db.query('UPDATE corredores SET nome = ?, turma = ? WHERE id = ?',
-    [nome, turma, id], (err, results) => {
+
+  if (!nome || !turma) {
+    return res.status(400).json({ error: 'Nome e turma sao obrigatorios' });
+  }
+
+  db.query(
+    'UPDATE corredores SET nome = ?, turma = ? WHERE id = ?',
+    [nome, turma, id],
+    (err) => {
       if (err) {
-        res.status(500).json({ error: 'Erro ao atualizar corredor' });
-      } else {
-        res.status(200).json({ id, nome, turma });
+        return res.status(500).json({ error: 'Erro ao atualizar corredor' });
       }
-    });
+
+      res.status(200).json({ id, nome, turma });
+    }
+  );
 });
 
-//Deletar um corredor
 routes.delete('/delete/:id', (req, res) => {
   const { id } = req.params;
-  db.query('DELETE FROM corredores WHERE id = ?', [id], (err, results) => {
+
+  db.query('DELETE FROM corredores WHERE id = ?', [id], (err) => {
     if (err) {
-      res.status(500).json({ error: 'Erro ao deletar corredor' });
-    } else {
-      res.status(200).json({ message: 'Corredor deletado com sucesso' });
+      return res.status(500).json({ error: 'Erro ao deletar corredor' });
     }
+
+    res.status(200).json({ message: 'Corredor deletado com sucesso' });
   });
 });
 
-//Buscar um corredor por id
-routes.get('/:id', (req, res) => {
-  const { id } = req.params;
-  db.query('SELECT * FROM corredores WHERE id = ?', [id], (err, results) => {
-    if (err) {
-      res.status(500).json({ error: 'Erro ao buscar corredor' });
-    } else {
-      if (results.length === 0) {
-        res.status(404).json({ error: 'Corredor não encontrado' });
-      } else {
-        res.status(200).json(results[0]);
-      }
-    }
-  });
-});
-
-//Registrar tempo de volta
-routes.post('/:id/volta', (req, res) => {
-  const { id } = req.params;
-  const { tempo } = req.body;
-  
-  // Primeiro verifica se o corredor existe
-  db.query('SELECT * FROM corredores WHERE id = ?', [id], (err, results) => {
-    if (err) {
-      res.status(500).json({ error: 'Erro ao buscar corredor' });
-    } else if (results.length === 0) {
-      res.status(404).json({ error: 'Corredor não encontrado' });
-    } else {
-      // Registra a volta
-      db.query('INSERT INTO voltas (tempo, data, corredores_id) VALUES (?, NOW(), ?)',
-        [tempo, id], (err, results) => {
-          if (err) {
-            res.status(500).json({ error: 'Erro ao registrar volta' });
-          } else {
-            res.status(201).json({ 
-              id: results.insertId, 
-              tempo, 
-              corredor_id: id,
-              message: 'Volta registrada com sucesso' 
-            });
-          }
-        });
-    }
-  });
-});
-
-//Buscar voltas de um corredor
-routes.get('/:id/voltas', (req, res) => {
-  const { id } = req.params;
-  db.query(`
-    SELECT v.*, c.nome as corredor_nome 
-    FROM voltas v 
-    JOIN corredores c ON v.corredores_id = c.id 
-    WHERE v.corredores_id = ? 
-    ORDER BY v.data DESC
-  `, [id], (err, results) => {
-    if (err) {
-      res.status(500).json({ error: 'Erro ao buscar voltas do corredor' });
-    } else {
-      res.json(results);
-    }
-  });
-});
-
-//Ranking de corredores (melhor tempo)
 routes.get('/ranking/melhores-tempos', (req, res) => {
   db.query(`
-    SELECT 
+    SELECT
       c.id,
       c.nome,
       c.turma,
-      MIN(v.tempo) as melhor_tempo,
-      COUNT(v.id) as total_voltas
+      MIN(v.tempo) AS melhor_tempo,
+      COUNT(v.id) AS total_voltas
     FROM corredores c
     LEFT JOIN voltas v ON c.id = v.corredores_id
     GROUP BY c.id, c.nome, c.turma
-    ORDER BY melhor_tempo IS NULL, melhor_tempo ASC
+    ORDER BY melhor_tempo IS NULL, melhor_tempo ASC, c.nome ASC
   `, (err, results) => {
     if (err) {
-      res.status(500).json({ error: 'Erro ao buscar ranking' });
-    } else {
-      res.json(results);
+      return res.status(500).json({ error: 'Erro ao buscar ranking' });
     }
+
+    res.json(results);
   });
 });
 
-module.exports = routes;
-
-// Endpoint para buscar as últimas voltas de todos os corredores
 routes.get('/voltas/recentes', (req, res) => {
-  // Retorna as 10 voltas mais recentes, com nome do corredor
-  const sql = `
-    SELECT v.id, v.tempo, v.data, c.nome as corredor_nome, c.turma
+  db.query(`
+    SELECT v.id, v.tempo, v.data, c.nome AS corredor_nome, c.turma
     FROM voltas v
     JOIN corredores c ON v.corredores_id = c.id
     ORDER BY v.data DESC
     LIMIT 10
-  `;
-  db.query(sql, (err, results) => {
+  `, (err, results) => {
     if (err) {
-      res.status(500).json({ error: 'Erro ao buscar voltas recentes' });
-    } else {
-      res.json(results);
+      return res.status(500).json({ error: 'Erro ao buscar voltas recentes' });
     }
+
+    res.json(results);
   });
 });
+
+routes.get('/:id/voltas', (req, res) => {
+  const { id } = req.params;
+
+  db.query(`
+    SELECT v.*, c.nome AS corredor_nome
+    FROM voltas v
+    JOIN corredores c ON v.corredores_id = c.id
+    WHERE v.corredores_id = ?
+    ORDER BY v.data DESC
+  `, [id], (err, results) => {
+    if (err) {
+      return res.status(500).json({ error: 'Erro ao buscar voltas do corredor' });
+    }
+
+    res.json(results);
+  });
+});
+
+routes.post('/:id/volta', (req, res) => {
+  const { id } = req.params;
+  const { tempo, data } = req.body;
+
+  if (!tempo) {
+    return res.status(400).json({ error: 'Tempo e obrigatorio' });
+  }
+
+  db.query('SELECT id FROM corredores WHERE id = ?', [id], (err, corredores) => {
+    if (err) {
+      return res.status(500).json({ error: 'Erro ao buscar corredor' });
+    }
+
+    if (corredores.length === 0) {
+      return res.status(404).json({ error: 'Corredor nao encontrado' });
+    }
+
+    const sql = data
+      ? 'INSERT INTO voltas (tempo, data, corredores_id) VALUES (?, ?, ?)'
+      : 'INSERT INTO voltas (tempo, corredores_id) VALUES (?, ?)';
+    const params = data ? [tempo, data, id] : [tempo, id];
+
+    db.query(sql, params, (insertErr, results) => {
+      if (insertErr) {
+        return res.status(500).json({ error: 'Erro ao registrar volta' });
+      }
+
+      res.status(201).json({
+        id: results.insertId,
+        tempo,
+        corredor_id: Number(id),
+        message: 'Volta registrada com sucesso'
+      });
+    });
+  });
+});
+
+routes.get('/:id', (req, res) => {
+  const { id } = req.params;
+
+  db.query('SELECT * FROM corredores WHERE id = ?', [id], (err, results) => {
+    if (err) {
+      return res.status(500).json({ error: 'Erro ao buscar corredor' });
+    }
+
+    if (results.length === 0) {
+      return res.status(404).json({ error: 'Corredor nao encontrado' });
+    }
+
+    res.status(200).json(results[0]);
+  });
+});
+
+module.exports = routes;

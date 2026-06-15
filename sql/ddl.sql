@@ -28,6 +28,7 @@ CREATE TABLE IF NOT EXISTS sakuraracing.users (
   nome VARCHAR(255) NOT NULL,
   email VARCHAR(255) NOT NULL,
   senha VARCHAR(255) NOT NULL,
+  UNIQUE INDEX email_UNIQUE (email ASC),
   PRIMARY KEY (id))
 ENGINE = InnoDB;
 
@@ -52,16 +53,19 @@ DROP TABLE IF EXISTS sakuraracing.voltas ;
 
 CREATE TABLE IF NOT EXISTS sakuraracing.voltas (
   id INT NOT NULL AUTO_INCREMENT,
-  tempo TIME(3) NOT NULL,
-  dt DATE NOT NULL,
-  PRIMARY KEY (id_volta))
+  tempo DECIMAL(10,3) NOT NULL,
+  data DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  corredores_id INT NOT NULL,
+  PRIMARY KEY (id),
+  INDEX fk_voltas_corredores_idx (corredores_id ASC),
+  CONSTRAINT fk_voltas_corredores
+    FOREIGN KEY (corredores_id)
+    REFERENCES sakuraracing.corredores (id)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE)
 ENGINE = InnoDB;
 
 
 SET SQL_MODE=@OLD_SQL_MODE;
 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
-
-
-
-SELECT * FROM users;
