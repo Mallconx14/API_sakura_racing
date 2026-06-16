@@ -66,13 +66,14 @@ routes.delete('/delete/:id', (req, res) => {
 });
 
 routes.get('/ranking/melhores-tempos', (req, res) => {
+  // Ranking por SOMA dos tempos de cada corredor (quanto menor, melhor)
   db.query(`
     SELECT
       c.id,
       c.unidade,
       c.nome,
       c.turma,
-      MIN(v.tempo) AS melhor_tempo,
+      SUM(v.tempo) AS melhor_tempo,
       COUNT(v.id) AS total_voltas
     FROM corredores c
     LEFT JOIN voltas v ON c.id = v.corredores_id
@@ -86,6 +87,7 @@ routes.get('/ranking/melhores-tempos', (req, res) => {
     res.json(results);
   });
 });
+
 
 routes.get('/voltas/recentes', (req, res) => {
   db.query(`
